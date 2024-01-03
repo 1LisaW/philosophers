@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philosophers.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tklimova <tklimova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 11:55:46 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/02 14:42:24 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/03 03:05:43 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 # include <stdio.h>
 # include <limits.h>
 # include <stdlib.h>
+# include <pthread.h>
 
 enum e_philo_args
 {
@@ -37,6 +38,10 @@ typedef struct s_philo_args
 	int	have_oblig;
 }		t_philo_args;
 
-int	parse_args(t_philo_args *ph_args, int argc, char **argv);
+int		parse_args(t_philo_args *ph_args, int argc, char **argv);
+
+void	*eat();
+
+int		threads_generator(t_philo_args *philo_args);
 
 #endif

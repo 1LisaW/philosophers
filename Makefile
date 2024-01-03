@@ -10,16 +10,16 @@ SRC_DIR	=	philo
 
 BUILD_DIR	=	build
 
-FILES	=	parse_args philosophers
+FILES	=	parse_args threads actions philosophers
 
-SRCS = $(addprefix $(SRC_DIR)/, $(addsuffix .c, $(FILES))) 
+SRCS = $(addprefix $(SRC_DIR)/, $(addsuffix .c, $(FILES)))
 
 OBJS = $(addsuffix .o, $(FILES))
 
 OBJS_WITH_DIR	=	$(addprefix $(SRC_DIR)/$(BUILD_DIR)/, $(OBJS))
 
 %.o : %.c
-		$(CC) -c $(CFLAGS) $< -o $@
+		$(CC) -c -pthreads $(CFLAGS) $< -o $@
 
 
 all:	$(NAME)
