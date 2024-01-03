@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
+/*   By: tklimova <tklimova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 23:13:20 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/03 03:06:53 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/03 11:52:09 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,4 +35,56 @@ int	threads_generator(t_philo_args *philo_args)
 		i++;
 	}
 	return (0);
+}
+
+void	create_forks(int idx, t_philo *philo, int last_idx)
+{
+	pthread_mutex_t	*mutex_l;
+	pthread_mutex_t	*mutex_r;
+
+	if (!idx)
+	{
+		pthread_mutex_init(&mutex_l, NULL);
+		philo->fork_l = &mutex_l;
+	}
+	else if (idx + 1 == last_idx)
+	
+	
+}
+
+void	create_philo(t_philo *philos_arr, int idx, t_philo_args *philo_args)
+{
+	t_philo	philo_inst;
+
+	if (!idx)
+	{
+		
+	}
+	if (idx + 1 == philo_args->number_of_philosophers)
+		philo_inst.fork_r = philos_arr[0].fork_l;
+	else if (!idx)
+	{
+		//create left
+		//create right
+	}
+	else
+		philo_inst.fork_l = philos_arr[idx - 1].fork_r;
+	
+}
+
+int	create_philos(t_philo_args *philo_args)
+{
+	t_philo	*philos_arr;
+	int		i;
+
+	i = 0;
+	philos_arr = malloc(sizeof(t_philo) * philo_args->number_of_philosophers);
+	if (!philos_arr)
+		return (1);
+	while (i < philo_args->number_of_philosophers)
+	{
+		create_philo(philos_arr, i, parse_args);
+		i++;
+	}
+	
 }

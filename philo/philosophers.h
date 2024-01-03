@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   philosophers.h                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
+/*   By: tklimova <tklimova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 11:55:46 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/03 03:05:43 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/03 11:34:19 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,13 +19,12 @@
 # include <stdlib.h>
 # include <pthread.h>
 
-enum e_philo_args
+enum e_philo_states
 {
-	number_of_philosophers,
-	time_to_die,
-	time_to_eat,
-	time_to_sleep,
-	number_of_times_each_philosopher_must_eat
+	thinking,
+	eating,
+	sleeping,
+	dead,
 };
 
 typedef struct s_philo_args
@@ -37,6 +36,16 @@ typedef struct s_philo_args
 	int	number_of_times_each_philosopher_must_eat;
 	int	have_oblig;
 }		t_philo_args;
+
+typedef struct s_philo
+{
+	pthread_t		*th;
+	pthread_mutex_t	*fork_l;
+	pthread_mutex_t	*fork_r;
+	e_philo_states	state;
+	int				timestemp;
+}		t_philo;
+
 
 int		parse_args(t_philo_args *ph_args, int argc, char **argv);
 
