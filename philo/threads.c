@@ -6,7 +6,7 @@
 /*   By: tklimova <tklimova@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 23:13:20 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/03 11:52:09 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/03 13:36:08 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,18 +37,31 @@ int	threads_generator(t_philo_args *philo_args)
 	return (0);
 }
 
-void	create_forks(int idx, t_philo *philo, int last_idx)
+void	create_forks(int idx, t_philo *philos_arr, int last_idx)
 {
 	pthread_mutex_t	*mutex_l;
 	pthread_mutex_t	*mutex_r;
+	t_philo			philo;
 
-	if (!idx)
+	philo = philos_arr[idx];
+	if (idx)
+	{
+		philo.fork_l = philos_arr[idx - 1].fork_r;
+		if (idx + 1 == last_idx)
+			philos_arr[idx].fork_r = philos_arr[0].fork_l;
+		else
+		{
+			pthread_mutex_init(&mutex_r, NULL);
+			philo.fork_r = &mutex_r;
+		}
+	}
+	else
 	{
 		pthread_mutex_init(&mutex_l, NULL);
-		philo->fork_l = &mutex_l;
+		philo.fork_l = &mutex_l;
 	}
-	else if (idx + 1 == last_idx)
-	
+	if (idx + 1 == last_idx)
+		philos_arr[idx].fork_r = philos_arr[0].fork_l;
 	
 }
 
