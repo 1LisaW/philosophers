@@ -6,33 +6,11 @@
 /*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/03 02:47:39 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/15 00:14:01 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/15 14:00:37 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
-
-// static int	is_proceed(t_philo *ph, struct timeval *tm_stamp)
-// {
-// 	gettimeofday(tm_stamp, NULL);
-// 	if (!ph->is_proceed)
-// 		return (0);
-// 	if (ph->have_oblig && ph->has_eaten
-// 		>= ph->number_of_times_each_philosopher_must_eat)
-// 		ph->is_proceed = 0;
-// 	if (ph->is_proceed && get_ms_diff(&ph->timestemp_eaten, tm_stamp)
-// 		> ph->time_to_die)
-// 	{
-// 		ph->state = dead;
-// 		*ph->is_dead_soul = 1;
-// 		ph->is_proceed = 0;
-// 	}
-// 	if (*ph->is_dead_soul && ph->is_proceed)
-// 		ph->is_proceed = 0;
-// 	if (!ph->is_proceed)
-// 		pthread_detach(ph->th);
-// 	return (ph->is_proceed);
-// }
 
 void	ft_ms_sleep(t_philo	*ph, struct timeval *tm_stamp, int ms_diff)
 {
@@ -41,7 +19,7 @@ void	ft_ms_sleep(t_philo	*ph, struct timeval *tm_stamp, int ms_diff)
 
 	calc_ms_diff = 0;
 	tm_ph = ph->timestemp_eaten;
-	while (is_proceed(ph, tm_stamp) && ms_diff > calc_ms_diff)
+	while (is_proceed(ph) && ms_diff > calc_ms_diff)
 	{
 		usleep(500);
 		gettimeofday(tm_stamp, NULL);
@@ -53,18 +31,19 @@ void	ft_sleep(t_philo *ph, struct timeval *tm)
 {
 	struct timeval	tm_start;
 
+	if (!is_proceed(ph) || is_dead_soul(ph))
+		return ;
 	gettimeofday(&tm_start, NULL);
 	gettimeofday(tm, NULL);
 	ph->state = sleeping;
-	if (is_proceed(ph, tm))
+	if (is_proceed(ph))
 		ft_print_info(ph, tm, sleeping, 0);
-	while (is_proceed(ph, tm) && get_ms_diff(&tm_start, tm) < ph->time_to_sleep)
+	while (is_proceed(ph) && get_ms_diff(&tm_start, tm) < ph->time_to_sleep)
 	{
 		usleep(500);
 		gettimeofday(tm, NULL);
 	}
-	if (*ph->is_dead_soul || (ph->have_oblig && ph->has_eaten
-			== ph->number_of_times_each_philosopher_must_eat))
+	if (!is_proceed(ph) || is_dead_soul(ph))
 		return ;
 	ph->state = thinking;
 	gettimeofday(&tm_start, NULL);
@@ -73,26 +52,29 @@ void	ft_sleep(t_philo *ph, struct timeval *tm)
 
 void	ft_eat(t_philo *ph, struct timeval *tm_stamp)
 {
-	if (ph->state != thinking)
+	if (ph->fork_l == ph->fork_r)
 		return ;
-	if (ph->fork_l == ph->fork_r || !is_proceed(ph, tm_stamp))
+	if (!is_proceed(ph) || is_dead_soul(ph))
 		return ;
-	take_forks(ph);
+	if (take_forks(ph))
+		return ;
 	gettimeofday(tm_stamp, NULL);
-	if (!is_proceed(ph, tm_stamp))
-		return ;
-	ft_print_info(ph, tm_stamp, thinking, 1);
+	if (is_dead_soul(ph) || !is_proceed(ph))
+		return (drop_forks(ph));
+	// ft_print_info(ph, tm_stamp, thinking, 1);
 	ft_print_info(ph, tm_stamp, thinking, 2);
 	gettimeofday(&ph->timestemp_eaten, NULL);
+	gettimeofday(tm_stamp, NULL);
 	ph->state = eating;
 	ft_print_info(ph, tm_stamp, eating, 0);
 	ft_ms_sleep(ph, tm_stamp, ph->time_to_eat);
-	pthread_mutex_unlock(ph->fork_l);
-	pthread_mutex_unlock(ph->fork_r);
-	ft_print_info(ph, tm_stamp, eating, 3);
+	drop_forks(ph);
+	// ft_print_info(ph, tm_stamp, eating, 3);
 	ph->has_eaten += 1;
-	if (ph->state == eating)
-		ft_sleep(ph, tm_stamp);
+	if (is_proceed(ph) && ph->have_oblig
+		&& ph->has_eaten == ph->number_of_times_each_philosopher_must_eat)
+		set_is_proceed(ph, 0);
+	ft_sleep(ph, tm_stamp);
 	return ;
 }
 
@@ -106,11 +88,19 @@ void	*routine(void *philo)
 	gettimeofday(&ph->timestemp_create, NULL);
 	gettimeofday(&ph->timestemp_eaten, NULL);
 	gettimeofday(&tm_stamp, NULL);
-	while (is_proceed(ph, &tm_stamp))
+	while (!is_dead_soul(ph) && is_proceed(ph))
+		// && (!ph->have_oblig || ph->has_eaten
+		// < ph->number_of_times_each_philosopher_must_eat))
 	{
-		if (ph->state == thinking && ph->is_proceed)
+		if (ph->state == thinking)
+		{
+			pthread_mutex_lock(&ph->run_mtx);
 			ft_eat(ph, &tm_stamp);
+			pthread_mutex_unlock(&ph->run_mtx);
+		}
 	}
+	// if (is_proceed(ph))
+	// 	set_is_proceed(ph, 0);
 	pthread_detach(ph->th);
 	return (NULL);
 }

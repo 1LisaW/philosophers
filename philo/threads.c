@@ -3,101 +3,84 @@
 /*                                                        :::      ::::::::   */
 /*   threads.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tklimova <tklimova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 23:13:20 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/03 13:36:08 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/15 11:52:09 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
-int	threads_generator(t_philo_args *philo_args)
+void	philo_init(t_philo	*philo_inst, int idx, t_philo_args *philo_args)
 {
-	pthread_t	*thread_arr;
-	int			i;
-	int			philo_nb;
-
-	i = 0;
-	philo_nb = philo_args->number_of_philosophers;
-	thread_arr = malloc(sizeof(pthread_t) * (philo_nb));
-	while (i < philo_nb)
-	{
-		if (pthread_create(&thread_arr[i], (void *) NULL, &eat, (void *) NULL))
-			return (1);
-		i++;
-	}
-	i = 0;
-	while (i < philo_nb)
-	{
-		if (pthread_join(thread_arr[i], NULL))
-			return (1);
-		i++;
-	}
-	return (0);
+	philo_inst->nb = idx + 1;
+	philo_inst->is_proceed = 1;
+	philo_inst->is_dead_soul = NULL;
+	philo_inst->fork_l = NULL;
+	philo_inst->fork_r = NULL;
+	philo_inst->time_to_die = philo_args->time_to_die;
+	philo_inst->time_to_eat = philo_args->time_to_eat;
+	philo_inst->time_to_sleep = philo_args->time_to_sleep;
+	philo_inst->have_oblig = philo_args->have_oblig;
+	philo_inst->number_of_times_each_philosopher_must_eat
+		= philo_args->number_of_times_each_philosopher_must_eat;
+	philo_inst->has_eaten = 0;
+	philo_inst->state = thinking;
+	philo_inst->is_proceed_mtx = malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(philo_inst->is_proceed_mtx, NULL);
 }
 
-void	create_forks(int idx, t_philo *philos_arr, int last_idx)
-{
-	pthread_mutex_t	*mutex_l;
-	pthread_mutex_t	*mutex_r;
-	t_philo			philo;
-
-	philo = philos_arr[idx];
-	if (idx)
-	{
-		philo.fork_l = philos_arr[idx - 1].fork_r;
-		if (idx + 1 == last_idx)
-			philos_arr[idx].fork_r = philos_arr[0].fork_l;
-		else
-		{
-			pthread_mutex_init(&mutex_r, NULL);
-			philo.fork_r = &mutex_r;
-		}
-	}
-	else
-	{
-		pthread_mutex_init(&mutex_l, NULL);
-		philo.fork_l = &mutex_l;
-	}
-	if (idx + 1 == last_idx)
-		philos_arr[idx].fork_r = philos_arr[0].fork_l;
-	
-}
-
-void	create_philo(t_philo *philos_arr, int idx, t_philo_args *philo_args)
+void	create_philo(t_philo *philos_arr, int *idx, t_philo_args *philo_args)
 {
 	t_philo	philo_inst;
 
-	if (!idx)
+	philo_init(&philo_inst, *idx, philo_args);
+	philos_arr[*idx] = philo_inst;
+	if (*idx == 0)
 	{
-		
-	}
-	if (idx + 1 == philo_args->number_of_philosophers)
-		philo_inst.fork_r = philos_arr[0].fork_l;
-	else if (!idx)
-	{
-		//create left
-		//create right
+		philos_arr[*idx].is_dead_soul = malloc(sizeof(int));
+		*philos_arr[*idx].is_dead_soul = 0;
+		philos_arr[*idx].is_dead_mtx = malloc(sizeof(pthread_mutex_t));
+		pthread_mutex_init(philos_arr[*idx].is_dead_mtx, NULL);
 	}
 	else
-		philo_inst.fork_l = philos_arr[idx - 1].fork_r;
-	
+	{
+		philos_arr[*idx].is_dead_soul = philos_arr[0].is_dead_soul;
+		philos_arr[*idx].is_dead_mtx = philos_arr[0].is_dead_mtx;
+	}
+	pthread_mutex_init(&philos_arr[*idx].run_mtx, NULL);
+	gettimeofday(&philos_arr[*idx].timestemp_create, NULL);
+	gettimeofday(&philos_arr[*idx].timestemp_eaten, NULL);
+	create_forks(*idx, philos_arr, philo_args->number_of_philosophers);
+	pthread_create(&philos_arr[*idx].th, NULL, routine,
+		(void *) &philos_arr[*idx]);
+	*idx += 1;
 }
 
-int	create_philos(t_philo_args *philo_args)
+t_philo	*create_philos(t_philo_args *philo_args, struct timeval *tm)
 {
-	t_philo	*philos_arr;
-	int		i;
+	t_philo			*philos_arr;
+	int				i;
 
 	i = 0;
+	philos_arr = NULL;
+	if (!philo_args->number_of_philosophers)
+		return (NULL);
 	philos_arr = malloc(sizeof(t_philo) * philo_args->number_of_philosophers);
 	if (!philos_arr)
-		return (1);
+		return (NULL);
 	while (i < philo_args->number_of_philosophers)
+		create_philo(philos_arr, &i, philo_args);
+	check_dead_condition(philos_arr, philo_args, tm);
+	i = 0;
+	while (i < philo_args->number_of_philosophers
+		&& !is_dead_soul(&philos_arr[0]))
 	{
-		create_philo(philos_arr, i, parse_args);
+		if (is_proceed(&philos_arr[i]))
+			if (pthread_join(philos_arr[i].th, NULL))
+				return (philos_arr);
 		i++;
 	}
-	
+	return (philos_arr);
 }

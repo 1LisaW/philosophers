@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   validate_args.c                                    :+:      :+:    :+:   */
+/*   parse_args.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: tklimova <tklimova@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 12:22:26 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/02 16:11:53 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/04 23:26:52 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ int	parse_args(t_philo_args *ph_args, int argc, char **argv)
 	ph_args->time_to_die = args[1];
 	ph_args->time_to_eat = args[2];
 	ph_args->time_to_sleep = args[3];
+	ph_args->have_oblig = 0;
 	if (argc > 5)
 	{
 		ph_args->have_oblig = 1;
