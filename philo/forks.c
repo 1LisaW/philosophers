@@ -6,7 +6,7 @@
 /*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 07:06:11 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/15 13:39:06 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/19 00:00:11 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,35 +47,50 @@ void	create_forks(int idx, t_philo *philos_arr, int philo_amount)
 
 int	take_forks(t_philo *ph)
 {
-	// pthread_mutex_lock(ph->data_mtx);
 	if (ph->nb % 2)
 	{
+		// if (ph->shared->ph_nb % 2)
+		// 	usleep((1 + (ph->nb - 1) % 3) * 50);
 		pthread_mutex_lock(ph->fork_r);
 		pthread_mutex_lock(ph->fork_l);
 	}
 	else
 	{
+		// if (ph->shared->ph_nb % 2)
+		// 	usleep((1 + (ph->nb - 1) % 3) * 50);
 		pthread_mutex_lock(ph->fork_l);
 		pthread_mutex_lock(ph->fork_r);
 	}
-	// pthread_mutex_unlock(ph->data_mtx);
+	// else
+	// {
+	// 	usleep((1 + (ph->nb - 1) % 3) * 10);
+	// 	pthread_mutex_lock(ph->fork_l);
+	// 	pthread_mutex_lock(ph->fork_r);
+	// }
 	return (0);
 }
 
 void	drop_forks(t_philo *ph)
 {
-	// pthread_mutex_lock(ph->data_mtx);
 	if (ph->nb % 2)
 	{
 		pthread_mutex_unlock(ph->fork_r);
-		usleep(100);
+		// if (ph->shared->ph_nb % 2 == 0)
+		// 	usleep(200);
 		pthread_mutex_unlock(ph->fork_l);
+		usleep(200);
 	}
 	else
 	{
 		pthread_mutex_unlock(ph->fork_l);
-		usleep(100);
+		// if (ph->shared->ph_nb % 2 == 0)
+		// 	usleep(200);
 		pthread_mutex_unlock(ph->fork_r);
+		usleep(200);
 	}
-	// pthread_mutex_unlock(ph->data_mtx);
+	// else
+	// {
+	// 	pthread_mutex_unlock(ph->fork_l);
+	// 	pthread_mutex_unlock(ph->fork_r);
+	// }
 }

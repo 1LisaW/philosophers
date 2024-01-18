@@ -6,7 +6,7 @@
 /*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 11:51:27 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/15 12:32:34 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/18 04:08:18 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,7 @@ int	main(int argc, char **argv)
 	if (parse_args(ph_args, argc, argv))
 		return (1);
 	philo_arr = create_philos(ph_args, &tm);
-	// printf("\n%p", philo_arr[0].th);
-	clean_data(philo_arr, ph_args);
-	// free(philo_arr);
+	free(ph_args);
+	clean_data(philo_arr);
 	return (0);
 }

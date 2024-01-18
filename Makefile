@@ -12,6 +12,7 @@ BUILD_DIR	=	build
 
 FILES	=	parse_args check_exit_condition ft_print_info\
 			forks\
+			shared_helpers\
 			 threads helpers actions philosophers clean_data
 
 SRCS = $(addprefix $(SRC_DIR)/, $(addsuffix .c, $(FILES)))

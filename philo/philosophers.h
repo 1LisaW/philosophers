@@ -6,7 +6,7 @@
 /*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 11:55:46 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/15 11:51:19 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/18 22:12:37 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,20 @@ typedef struct s_philo_args
 	int	have_oblig;
 }		t_philo_args;
 
+typedef struct s_shared
+{
+	pthread_mutex_t	data_mtx;
+	pthread_mutex_t	is_dead_mtx;
+	int				ph_nb;
+	int				is_dead_soul;
+	int				time_to_die;
+	int				time_to_eat;
+	int				time_to_sleep;
+	int				have_oblig;
+	int				nb_meals;
+	int				detached_ph_nb;
+}		t_shared;
+
 typedef struct s_philo
 {
 	int					nb;
@@ -45,20 +59,22 @@ typedef struct s_philo
 	pthread_mutex_t		run_mtx;
 	pthread_mutex_t		*fork_l;
 	pthread_mutex_t		*fork_r;
-	pthread_mutex_t		*is_dead_mtx;
-	int					*is_dead_soul;
 	pthread_mutex_t		*is_proceed_mtx;
 	int					is_proceed;
 	enum e_philo_states	state;
 	struct timeval		timestemp_create;
 	struct timeval		timestemp_eaten;
-	int					time_to_die;
-	int					time_to_eat;
-	int					time_to_sleep;
-	int					number_of_times_each_philosopher_must_eat;
-	int					have_oblig;
 	int					has_eaten;
+	t_shared			*shared;
 }		t_philo;
+
+int		get_shared_is_dead(t_shared *shared);
+
+void	set_shared_is_dead(t_shared *shared, int is_dead);
+
+int		get_shared_detached(t_shared *shared);
+
+void	inc_shared_detached(t_shared *shared);
 
 int		parse_args(t_philo_args *ph_args, int argc, char **argv);
 
@@ -68,20 +84,21 @@ int		is_proceed(t_philo *ph);
 
 void	set_is_proceed(t_philo *ph, int is_proceed);
 
-int		is_dead_soul(t_philo *ph);
+// int		is_dead_soul(t_philo *ph);
 
-void	set_is_dead_soul(t_philo *ph, int is_dead_soul);
+// void	set_is_dead_soul(t_philo *ph, int is_dead_soul);
 
-void	check_dead_condition(t_philo *philos_arr, t_philo_args *philo_args,
-			struct timeval *tm);
+void	check_dead_condition(t_philo *philos_arr, struct timeval *tm);
 
 int		take_forks(t_philo *ph);
 
 void	drop_forks(t_philo *ph);
 
-long	get_ms_timestamp(struct timeval *tm_stamp);
+unsigned long	get_ms_timestamp(struct timeval *tm_stamp);
 
-long	get_ms_diff(struct timeval *tm_ph, struct timeval *tm_stamp);
+unsigned long	get_ms_diff(struct timeval *tm_ph, struct timeval *tm_stamp);
+
+void			make_delay(unsigned long ms, t_philo *ph);
 
 void	ft_print_info(t_philo *ph, struct timeval *timestamp,
 			enum e_philo_states state, int fork_idx);
@@ -90,6 +107,6 @@ void	*routine(void *philo);
 
 t_philo	*create_philos(t_philo_args *philo_args, struct timeval *tm);
 
-void	clean_data(t_philo *philos_arr, t_philo_args *philo_args);
+void	clean_data(t_philo *philos_arr);
 
 #endif
