@@ -6,7 +6,7 @@
 /*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 23:13:20 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/18 01:59:52 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/19 02:19:56 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,22 +15,22 @@
 t_shared	*create_shared(t_philo_args *philo_args)
 {
 	t_shared		*shared;
+	int				i;
 
+	i = 0;
 	shared = NULL;
 	shared = malloc(sizeof(t_shared));
 	if (!shared)
 		return (NULL);
 	pthread_mutex_init(&shared->data_mtx, NULL);
 	pthread_mutex_init(&shared->is_dead_mtx, NULL);
-	shared->ph_nb = philo_args->number_of_philosophers;
-	shared->detached_ph_nb = 0;
-	shared->have_oblig = philo_args->have_oblig;
-	shared->is_dead_soul = 0;
-	shared->nb_meals = 0
-		+ philo_args->number_of_times_each_philosopher_must_eat;
-	shared->time_to_die = philo_args->time_to_die;
-	shared->time_to_eat = philo_args->time_to_eat;
-	shared->time_to_sleep = philo_args->time_to_sleep;
+	fill_shared_from_args(philo_args, shared);
+	shared->dead_flags = malloc(sizeof(int) * shared->ph_nb);
+	while (i < shared->ph_nb)
+	{
+		shared->dead_flags[i] = 0;
+		i++;
+	}
 	return (shared);
 }
 
@@ -61,6 +61,33 @@ void	create_philo(t_philo *philos_arr, int *idx, t_shared *shared)
 	*idx += 1;
 }
 
+static t_philo	*ft_join_threads_ph(t_philo *philos_arr)
+{
+	int				i;
+	t_shared		*shared;
+
+	i = 0;
+	shared = philos_arr[0].shared;
+	while (i < shared->ph_nb
+		&& !get_shared_is_dead(shared))
+	{
+		if (is_proceed(&philos_arr[i]))
+			if (pthread_join(philos_arr[i].th, NULL))
+				return (philos_arr);
+		i += 2;
+	}
+	i = 1;
+	while (i < shared->ph_nb
+		&& !get_shared_is_dead(shared))
+	{
+		if (is_proceed(&philos_arr[i]))
+			if (pthread_join(philos_arr[i].th, NULL))
+				return (philos_arr);
+		i += 2;
+	}
+	return (NULL);
+}
+
 t_philo	*create_philos(t_philo_args *philo_args, struct timeval *tm)
 {
 	t_philo			*philos_arr;
@@ -78,14 +105,6 @@ t_philo	*create_philos(t_philo_args *philo_args, struct timeval *tm)
 	while (i < philo_args->number_of_philosophers)
 		create_philo(philos_arr, &i, shared);
 	check_dead_condition(philos_arr, tm);
-	i = 0;
-	while (i < shared->ph_nb
-		&& !get_shared_is_dead(shared))
-	{
-		if (is_proceed(&philos_arr[i]))
-			if (pthread_join(philos_arr[i].th, NULL))
-				return (philos_arr);
-		i++;
-	}
+	ft_join_threads_ph(philos_arr);
 	return (philos_arr);
 }

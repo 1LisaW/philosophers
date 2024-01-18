@@ -6,7 +6,7 @@
 /*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 12:22:26 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/04 23:26:52 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/19 02:38:27 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,8 @@ static int	is_int_positive_number(char *str)
 			not_a_nb = -2;
 		if (nb > INT_MAX)
 			not_a_nb = -3;
+		else if (nb == 0)
+			not_a_nb = -4;
 		str++;
 	}
 	if (not_a_nb)
@@ -41,14 +43,17 @@ static void	log_error(int err_no)
 	if (err_no >= 0)
 		return ;
 	if (err_no == -1)
-		printf("%s", "Incorrect number of arguments: \
-			function should be launched with from 3 to 4 arguments");
+		printf("%s %s", "Incorrect number of arguments:",
+			"function should be launched with from 3 to 4 arguments\n");
 	else if (err_no == -2)
-		printf("%s %i", "Incorrect arguments: \
-			all arguments should be positive integer numbers", err_no);
+		printf("%s %s %i", "Incorrect arguments:",
+			"all arguments should be positive integer numbers\n", err_no);
 	else if (err_no == -3)
-		printf("%s", "Incorrect arguments: \
-			arguments bigger than max integer size");
+		printf("%s %s", "Incorrect arguments:",
+			"arguments bigger than max integer size\n");
+	else if (err_no == -4)
+		printf("%s %s", "Incorrect arguments:",
+			"arguments should be positive numbers\n");
 }
 
 static int	is_valid_args(int argc)

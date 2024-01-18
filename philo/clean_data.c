@@ -6,7 +6,7 @@
 /*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/15 02:41:04 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/18 04:10:08 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/19 02:43:24 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,5 +66,6 @@ void	clean_data(t_philo *philos_arr)
 	free(philos_arr);
 	pthread_mutex_unlock(&shared->data_mtx);
 	pthread_mutex_destroy(&shared->data_mtx);
+	free(shared->dead_flags);
 	free(shared);
 }

@@ -6,7 +6,7 @@
 /*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/02 11:55:46 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/18 22:12:37 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/19 02:10:13 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ typedef struct s_shared
 	int				have_oblig;
 	int				nb_meals;
 	int				detached_ph_nb;
+	int				*dead_flags;
 }		t_shared;
 
 typedef struct s_philo
@@ -68,31 +69,30 @@ typedef struct s_philo
 	t_shared			*shared;
 }		t_philo;
 
-int		get_shared_is_dead(t_shared *shared);
+void			fill_shared_from_args(t_philo_args *philo_args,
+					t_shared *shared);
 
-void	set_shared_is_dead(t_shared *shared, int is_dead);
+int				get_shared_is_dead(t_shared *shared);
 
-int		get_shared_detached(t_shared *shared);
+void			set_shared_is_dead(t_shared *shared, int is_dead);
 
-void	inc_shared_detached(t_shared *shared);
+int				get_shared_detached(t_shared *shared);
 
-int		parse_args(t_philo_args *ph_args, int argc, char **argv);
+void			inc_shared_detached(t_shared *shared);
 
-void	create_forks(int idx, t_philo *philos_arr, int philo_amount);
+int				parse_args(t_philo_args *ph_args, int argc, char **argv);
 
-int		is_proceed(t_philo *ph);
+void			create_forks(int idx, t_philo *philos_arr, int philo_amount);
 
-void	set_is_proceed(t_philo *ph, int is_proceed);
+int				is_proceed(t_philo *ph);
 
-// int		is_dead_soul(t_philo *ph);
+void			set_is_proceed(t_philo *ph, int is_proceed);
 
-// void	set_is_dead_soul(t_philo *ph, int is_dead_soul);
+void			check_dead_condition(t_philo *philos_arr, struct timeval *tm);
 
-void	check_dead_condition(t_philo *philos_arr, struct timeval *tm);
+int				take_forks(t_philo *ph);
 
-int		take_forks(t_philo *ph);
-
-void	drop_forks(t_philo *ph);
+void			drop_forks(t_philo *ph);
 
 unsigned long	get_ms_timestamp(struct timeval *tm_stamp);
 
@@ -100,13 +100,13 @@ unsigned long	get_ms_diff(struct timeval *tm_ph, struct timeval *tm_stamp);
 
 void			make_delay(unsigned long ms, t_philo *ph);
 
-void	ft_print_info(t_philo *ph, struct timeval *timestamp,
-			enum e_philo_states state, int fork_idx);
+void			ft_print_info(t_philo *ph, struct timeval *timestamp,
+					enum e_philo_states state, int fork_idx);
 
-void	*routine(void *philo);
+void			*routine(void *philo);
 
-t_philo	*create_philos(t_philo_args *philo_args, struct timeval *tm);
+t_philo			*create_philos(t_philo_args *philo_args, struct timeval *tm);
 
-void	clean_data(t_philo *philos_arr);
+void			clean_data(t_philo *philos_arr);
 
 #endif

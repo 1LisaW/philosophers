@@ -6,7 +6,7 @@
 /*   By: tklimova <tklimova@student.42berlin.de>    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/01/04 16:40:04 by tklimova          #+#    #+#             */
-/*   Updated: 2024/01/18 22:47:42 by tklimova         ###   ########.fr       */
+/*   Updated: 2024/01/19 00:47:37 by tklimova         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,11 @@ void	make_delay(unsigned long ms, t_philo *ph)
 
 	gettimeofday(&start_tm, NULL);
 	gettimeofday(&tm_val, NULL);
+	if (!ms)
+		return ;
 	while (is_proceed(ph) && get_ms_diff(&start_tm, &tm_val) < ms)
 	{
-		usleep(500);
+		usleep(10);
 		gettimeofday(&tm_val, NULL);
 	}
 }
